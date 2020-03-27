@@ -9,10 +9,9 @@ let s:target = get(g:, "translating_target", "ja")
 let s:source = get(g:, "translating_source", "en")
 
 function! s:parse_flags(flagList) abort
-    let flagList = a:flagList
     let isSource = 0
     let isTarget = 0
-    for flag in flagList
+    for flag in a:flagList
         if isSource == 1
             let s:source = flag
             let isSource = 0
@@ -25,9 +24,6 @@ function! s:parse_flags(flagList) abort
             let isTarget = 1
         endif
     endfor
-    echo s:source
-    echo s:target
-
 endfunction
 
 function! s:read_to_buf(buf, chan) abort
@@ -58,7 +54,7 @@ function! s:setRelativeCursorPosition() abort
     let curTabNumber = tabpagenr()
 
     let s:relativeCursorPosition[0] = line(".") - winheight(curTabNumber) + 1
-    let s:relativeCursorPosition[1] = col(".")
+    let s:relativeCursorPosition[1] = col(".") + 4
 endfunction
 
 function! s:setTextCursorPosition() abort
@@ -78,7 +74,6 @@ function! translating#popupText(text) abort
                 \ "border": [1, 1, 1, 1],
                 \ "line": s:relativeCursorPosition[0],
                 \ "col": s:relativeCursorPosition[1],
-                \ "maxwidth": 30,
                 \ 'borderchars': ['-','|','-','|','+','+','+','+'],
                 \ "moved": "any",
                 \ })
@@ -90,19 +85,15 @@ function! translating#replaceText(text) abort
     let i = 0
     let firstLine = s:textLineRangeList[0]
     let lastLine = s:textLineRangeList[1]
-
-    echo s:textLineRangeList
-    echo tlist
-    echo selectedTlist
-
-    echo len(tlist)
-    echo len(selectedTlist)
     
-    for line in range(firstLine, lastLine)
-        call execute(":" . line . " s/" . selectedTlist[i] . "/" . tlist[i] . "/g")
+    for lineNumber in range(firstLine, lastLine)
+        let oldLine = getline(lineNumber, lineNumber)[0]
+        let newLine = substitute(oldLine, selectedTlist[i], tlist[i], "g")
+        call setline(lineNumber, newLine)
         let i = i + 1
     endfor
-    let s:textLineRangeList = []
+
+    let s:textLineRangeList = [0, 0]
 
 endfunction
 
@@ -124,10 +115,6 @@ function! s:TranslateSelectedText() range
     call s:setTextCursorPosition()
 
     return s:TranslateText(s:selected)
-
-    " " let url = 'https://script.google.com/macros/s/AKfycby4U810pYK-d2ADQis7CNXouuwtJqvnyiEYDQQ7PiXTC0TLwu-y/exec?text=' . s:HTTP.encodeURIComponent(s:selected) . '&source=' . s:source . '&target=' . s:target
-    " let url = 'https://script.google.com/macros/s/AKfycby4U810pYK-d2ADQis7CNXouuwtJqvnyiEYDQQ7PiXTC0TLwu-y/exec?text=+' . s:HTTP.encodeURIComponent(s:selected) . '&source=' . s:source . '&target=' . s:target
-    " return s:sh('curl', ' -L', url).then({data -> data})
 endfunction
 
 function! translating#Translate(text)
