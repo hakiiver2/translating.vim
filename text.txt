@@ -1,9 +1,2 @@
 外国語を学ぶことは重要です
 Learning a foreign language is important
-Learning a foreign language is important
-
-const a  = "hello"
-const a       = "hello"
-const a     = "hello"
-const a      = "hello"
-const a        = "hello"
